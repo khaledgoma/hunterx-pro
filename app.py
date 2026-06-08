@@ -15,6 +15,8 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from flask_wtf.csrf import CSRFProtect, CSRFError
+from wtforms.validators import Email as EmailValidator
+import re
 from urllib.parse import urlparse
 import os, json, hashlib, secrets, logging
 
@@ -229,7 +231,10 @@ def handle_csrf_error(e):
     if referrer and is_safe_url(referrer):
         return redirect(referrer)
     return redirect(url_for('dashboard'))
-
+def is_valid_email(email):
+    """التحقق من صيغة الإيميل"""
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(pattern, email) is not None
 def hash_token(token):
     return hashlib.sha256(token.encode()).hexdigest()
 
@@ -259,6 +264,9 @@ def register():
     if request.method == 'POST':
         username = request.form.get('username', '')
         email = request.form.get('email', '')
+        if not is_valid_email(email):
+            flash('Please enter a valid email address.', 'danger')
+            return redirect(url_for('register'))
         password = request.form.get('password', '')
         ref = request.args.get('ref', '')
         
