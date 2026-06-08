@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: hunterx-enterprise
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: HUNTERX_MAIL_PASS
+        value: fyusquuzgjisevxgx
+      - key: HUNTERX_MAIL_USER
+        value: khaledalqinas@gmail.com

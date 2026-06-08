@@ -1,0 +1,6 @@
+*.db
+*.pyc
+__pycache__/
+instance/
+reports/
+*.pdf

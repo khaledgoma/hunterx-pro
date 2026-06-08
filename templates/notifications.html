@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications - HunterX Enterprise</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #f8f9fa; }
+        .notification-card { border-radius: 10px; margin-bottom: 8px; transition: background 0.3s; }
+        .notification-card.unread { background: #e8f4fd; border-left: 4px solid #1976d2; }
+        .notification-card.read { background: #f8f9fa; opacity: 0.7; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container">
+            <span class="navbar-brand">🛡️ HunterX Enterprise</span>
+            <div>
+                <a href="/" class="btn btn-outline-light btn-sm">Dashboard</a>
+                <a href="/reports" class="btn btn-outline-light btn-sm">Reports</a>
+                <a href="/pricing" class="btn btn-warning btn-sm fw-bold">⚡ Upgrade</a>
+                <a href="/notifications" class="btn btn-outline-light btn-sm active position-relative">
+                    🔔
+                    {% if unread_count and unread_count > 0 %}
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        {{ unread_count }}
+                    </span>
+                    {% endif %}
+                </a>
+                <a href="/logout" class="btn btn-outline-danger btn-sm">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="d-flex justify-content-between align-items-center">
+            <h2>🔔 Notifications</h2>
+            <a href="/notifications/clear" class="btn btn-outline-danger btn-sm">Clear All</a>
+        </div>
+
+        {% if notifications %}
+            {% for notif in notifications %}
+            <div class="card notification-card {{ 'unread' if not notif.is_read else 'read' }} p-3">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <strong>{{ notif.icon }} {{ notif.title }}</strong>
+                        <p class="mb-0 text-muted">{{ notif.message | safe }}</p>
+                    </div>
+                    <div class="text-end">
+                        <small class="text-muted">{{ notif.created_at.strftime('%Y-%m-%d %H:%M') if notif.created_at else '' }}</small>
+                        {% if not notif.is_read %}
+                        <br><a href="/notifications/read/{{ notif.id }}" class="btn btn-sm btn-outline-primary">Mark Read</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="text-center py-5 text-muted">
+                <h4>📭 No notifications yet</h4>
+                <p>You're all caught up!</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

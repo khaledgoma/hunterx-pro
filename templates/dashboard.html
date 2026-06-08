@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - HunterX Enterprise</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #f8f9fa; }
+        .stat-card { border-radius: 10px; padding: 20px; color: white; margin-bottom: 15px; }
+        .bg-critical { background: #d32f2f; }
+        .bg-high { background: #e64a19; }
+        .bg-medium { background: #f57c00; }
+        .bg-low { background: #388e3c; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container">
+            <span class="navbar-brand">🛡️ HunterX Enterprise</span>
+            <div>
+                <a href="/" class="btn btn-outline-light btn-sm active">Dashboard</a>
+                <a href="/reports" class="btn btn-outline-light btn-sm">Reports</a>
+                <a href="/pricing" class="btn btn-warning btn-sm fw-bold">⚡ Upgrade</a>
+                <a href="/notifications" class="btn btn-outline-light btn-sm position-relative">
+                    🔔
+                    {% if unread_count and unread_count > 0 %}
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        {{ unread_count }}
+                    </span>
+                    {% endif %}
+                </a>
+                <a href="/profile" class="btn btn-outline-light btn-sm">👤 {{ user.username }}</a>
+                <a href="/logout" class="btn btn-outline-danger btn-sm">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% if user.plan == 'trial' %}
+        <div class="alert alert-warning alert-dismissible fade show">
+            ⚠️ <strong>Free Trial Active</strong> - You have limited access. 
+            <a href="/pricing" class="btn btn-sm btn-warning ms-3">Upgrade Now</a>
+        </div>
+        {% endif %}
+
+        <h2>📊 Security Dashboard</h2>
+        <p class="text-muted">Last scan: {{ stats.last_scan }}</p>
+
+        <div class="row mt-4">
+            <div class="col-md-3">
+                <div class="stat-card bg-critical"><h4>{{ stats.critical }}</h4><p>Critical</p></div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card bg-high"><h4>{{ stats.high }}</h4><p>High</p></div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card bg-medium"><h4>{{ stats.medium }}</h4><p>Medium</p></div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card bg-low"><h4>{{ stats.low }}</h4><p>Low</p></div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header"><strong>🚀 Start New Scan</strong></div>
+                    <div class="card-body">
+                        <form action="/scan" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="text" name="target" class="form-control mb-2" placeholder="Target domain (e.g., example.com)">
+                            <button type="submit" class="btn btn-primary w-100" {% if user.plan == 'trial' %}disabled{% endif %}>
+                                {% if user.plan == 'trial' %}🔒 Upgrade to Scan{% else %}Start Scan{% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header"><strong>🎯 Monitored Targets</strong></div>
+                    <div class="card-body">
+                        <ul class="list-group">
+                            {% for target in stats.targets %}
+                            <li class="list-group-item">{{ target }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header"><strong>📋 Quick Report Generator</strong></div>
+                    <div class="card-body">
+                        <form action="/generate-report" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <input type="text" name="program" class="form-control mb-2" placeholder="Program Name">
+                                </div>
+                                <div class="col-md-4">
+                                    <select name="template" class="form-select mb-2">
+                                        <option value="1">Exported Component</option>
+                                        <option value="2">Insecure WebView</option>
+                                        <option value="3">Hardcoded Key</option>
+                                        <option value="4">IDOR</option>
+                                        <option value="5">SQL Injection</option>
+                                        <option value="6">XSS</option>
+                                        <option value="7">CSRF</option>
+                                        <option value="8">SSRF</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <select name="severity" class="form-select mb-2">
+                                        <option value="CRITICAL">Critical</option>
+                                        <option value="HIGH">High</option>
+                                        <option value="MEDIUM">Medium</option>
+                                        <option value="LOW">Low</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <textarea name="description" class="form-control mb-2" rows="2" placeholder="Description (optional)"></textarea>
+                            <button type="submit" class="btn btn-success w-100" {% if user.plan == 'trial' %}disabled{% endif %}>
+                                {% if user.plan == 'trial' %}🔒 Upgrade to Generate{% else %}Generate PDF Report{% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

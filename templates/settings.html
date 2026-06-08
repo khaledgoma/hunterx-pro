@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - HunterX Enterprise</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container">
+            <span class="navbar-brand">🛡️ HunterX Enterprise</span>
+            <div>
+                <a href="/" class="btn btn-outline-light btn-sm">Dashboard</a>
+                <a href="/reports" class="btn btn-outline-light btn-sm">Reports</a>
+                <a href="/pricing" class="btn btn-warning btn-sm fw-bold">⚡ Upgrade</a>
+                <a href="/notifications" class="btn btn-outline-light btn-sm position-relative">
+                    🔔
+                    {% if unread_count and unread_count > 0 %}
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ unread_count }}</span>
+                    {% endif %}
+                </a>
+                <a href="/profile" class="btn btn-outline-light btn-sm">👤 Profile</a>
+                <a href="/logout" class="btn btn-outline-danger btn-sm">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h2>⚙️ Settings</h2>
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header"><strong>🔔 Notifications</strong></div>
+                    <div class="card-body">
+                        <p>Notification settings coming soon.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header"><strong>⏰ Scheduled Scans</strong></div>
+                    <div class="card-body">
+                        <p>Automated scanning features coming soon.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

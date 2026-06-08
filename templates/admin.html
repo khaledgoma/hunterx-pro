@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - HunterX Enterprise</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #f8f9fa; }
+        .stat-card { border-radius: 12px; padding: 20px; color: white; margin-bottom: 15px; }
+        .bg-users { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .bg-scans { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .bg-clicks { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .bg-earnings { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container">
+            <span class="navbar-brand">🛡️ HunterX Admin</span>
+            <div>
+                <a href="/" class="btn btn-outline-light btn-sm">Dashboard</a>
+                <a href="/affiliates" class="btn btn-outline-light btn-sm">Affiliates</a>
+                <a href="/logout" class="btn btn-outline-danger btn-sm">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <h2>📊 Admin Control Panel</h2>
+
+        <div class="row mt-3">
+            <div class="col-md-3">
+                <div class="stat-card bg-users"><h3>{{ total_users }}</h3><p>Users ({{ paid_users }} Paid)</p></div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card bg-scans"><h3>{{ total_scans }}</h3><p>Total Scans</p></div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card bg-clicks"><h3>{{ total_clicks }}</h3><p>Clicks</p></div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card bg-earnings"><h3>${{ "%.2f"|format(total_earnings) }}</h3><p>Earnings</p></div>
+            </div>
+        </div>
+
+        <!-- Users Table -->
+        <div class="card mt-4">
+            <div class="card-header bg-dark text-white"><strong>👥 Users</strong></div>
+            <div class="card-body">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Plan</th>
+                            <th>Assets</th>
+                            <th>Active</th>
+                            <th>Joined</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in recent_users %}
+                        <tr>
+                            <td>{{ u.id }}</td>
+                            <td>{{ u.username }}</td>
+                            <td>{{ u.email }}</td>
+                            <td><span class="badge bg-{{ 'success' if u.plan != 'trial' else 'warning' }}">{{ u.plan }}</span></td>
+                            <td>{{ u.assets_limit }}</td>
+                            <td>{{ '✅' if u.is_active else '❌' }}</td>
+                            <td>{{ u.created_at.strftime('%Y-%m-%d') }}</td>
+                            <td>
+                                <form action="/admin/user/{{ u.id }}/edit" method="POST" style="display:inline;">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <select name="plan" class="form-select form-select-sm d-inline w-auto">
+                                        <option value="trial" {% if u.plan=='trial' %}selected{% endif %}>Trial</option>
+                                        <option value="starter" {% if u.plan=='starter' %}selected{% endif %}>Starter</option>
+                                        <option value="professional" {% if u.plan=='professional' %}selected{% endif %}>Pro</option>
+                                        <option value="enterprise" {% if u.plan=='enterprise' %}selected{% endif %}>Enterprise</option>
+                                    </select>
+                                    <input type="number" name="assets_limit" value="{{ u.assets_limit }}" class="form-control form-control-sm d-inline w-auto" style="width:60px;">
+                                    <select name="is_active" class="form-select form-select-sm d-inline w-auto">
+                                        <option value="true" {% if u.is_active %}selected{% endif %}>Active</option>
+                                        <option value="false" {% if not u.is_active %}selected{% endif %}>Suspended</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                                </form>
+                                {% if u.username != 'admin' %}
+                                <form action="/admin/user/{{ u.id }}/delete" method="POST" style="display:inline;">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete user {{ u.username }}?')">🗑️</button>
+                                </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
