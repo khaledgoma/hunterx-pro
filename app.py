@@ -289,15 +289,15 @@ def register():
             plan='trial', assets_limit=1, affiliate_ref=valid_ref,
             is_active=True, email_verified=True
         )
-        db.session.add(user)
+                db.session.add(user)
         db.session.commit()
         
-        # إشعار خاص بالمستخدم الجديد فقط
-        send_notification("🎉 Welcome!", f"Thanks for joining, {username}! Your 3-day trial starts now.", "👋", user_id=user.id)
-        # إشعار عام للأدمن فقط
-        send_notification("🆕 New User Registered", f"<b>{username}</b> ({email}) just joined.", "👤")
-        
-        session.clear()
+        # إشعار خاص بالمستخدم الجديد فقط (مع تجاهل الأخطاء)
+        try:
+            send_notification("🎉 Welcome!", f"Thanks for joining, {username}! Your 3-day trial starts now.", "👋", user_id=user.id)
+            send_notification("🆕 New User Registered", f"<b>{username}</b> ({email}) just joined.", "👤")
+        except Exception:
+            pass  # تجاهل أي خطأ في الإشعارات أو الإيميلات
         session['user_id'] = user.id
         session['user_name'] = user.username
         session.permanent = True
