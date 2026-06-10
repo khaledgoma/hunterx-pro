@@ -48,7 +48,6 @@
                     {% endwith %}
                     
                     <form action="/register" method="POST">
-                        <!-- 🔒 CSRF Token في أول الفورم مباشرة -->
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         
                         <div class="mb-3">
